@@ -1,40 +1,104 @@
+import os, tempfile
 import streamlit as st
+from streamlit import session_state as sst
 from langchain_community.document_loaders.pdf import PyPDFLoader
 from langchain.indexes import VectorstoreIndexCreator
-from langchain_openai import ChatOpenAI
-import os, shutil
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
+from streamlit_chat import message
 
-from dotenv import load_dotenv
-load_dotenv()
+OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']
 
-# Front end
-st.title("AskNotes.ai")
+def initialize_chat_history():
+    sst["chat_history"] = [
+        {
+            'role':'ai',
+            'content': "Hi! I'm AskNotes.ai. Ask me anything about the uploaded PDF!"
+        }
+    ]
 
-# File Uploader
-pdfs = st.file_uploader(label="Upload PDF", accept_multiple_files=True, type='.pdf')
+def show_chat(messages:list):
+  for i, msg in enumerate(messages):
+    message(
+        message=msg['content'], 
+        is_user=msg['role'] == 'user', 
+        key=str(i)
+        )
 
-# Create new directory
-newpath = 'D:\VSCodePrograms\AskNotes\Asknotes\DataFiles'
-if not os.path.exists(newpath):
-    os.makedirs(newpath)
+def get_vectorstore(loader_list:list):
+    embeddings = OpenAIEmbeddings()
+    vectorstore = VectorstoreIndexCreator(vectorstore_cls=FAISS, embedding=embeddings).from_loaders(loader_list)
+    return vectorstore
 
-# Copy PDFs to new directory
-for pdf in pdfs:
-    try:
-        shutil.copy(src=os.path.abspath(pdf.name), dst=f'D:\VSCodePrograms\AskNotes\Asknotes\DataFiles\{pdf.name}')
-    except:
-        st.write(f'{pdf.name} not found')
-        break
-    
-# Prompt
-prompt = st.text_input("Enter your prompt")
+def get_loader(pdf_files:list):
+    pdf_loader_list = []
+    temp_paths = []
+    for pdf in pdf_files:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as f:
+            f.write(pdf.getvalue())  # Write PDF content to file
+            pdf_loader_list.append(PyPDFLoader(f.name))  # Append loader
+            temp_paths.append(f.name)  # Save path for later cleanup
+    return pdf_loader_list, temp_paths
 
-if prompt:
-    loader = PyPDFLoader(newpath)
-    index = VectorstoreIndexCreator().from_loaders([loader]) #Vectorizing
+def delete_temp_files(temp_paths:list):
+    for path in temp_paths:
+        os.remove(path)
 
-    llm = ChatOpenAI(model='gpt-4', verbose=True, temperature=0.6)
 
-    response = index.query(prompt)
-    st.write(response)
-    print(response)
+def main():
+    # Front end
+    st.set_page_config(
+        page_title="Asknotes.ai", 
+        layout="wide", page_icon='📝', 
+        initial_sidebar_state='expanded'
+        )
+    st.title("📝AskNotes.ai")
+
+    # ---- Sidebar Content ----
+    with st.sidebar:
+        # File Uploader
+        pdf_files = st.file_uploader(
+            label="Upload your PDF", 
+            type='pdf',
+            accept_multiple_files=True,
+            label_visibility='hidden'
+            )
+
+        if st.button("Clear Chat History"):
+            initialize_chat_history()
+    # ----  ----  ----  ----  ----
+
+    if pdf_files:
+
+        if "chat_history" not in sst:
+            initialize_chat_history()
+
+        show_chat(sst.chat_history)
+        
+        # User Prompt
+        prompt = st.chat_input("Enter your question:")
+        if prompt:
+            message(prompt,is_user=True) # Displays user message
+            sst.chat_history.append({"role": "user", "content": prompt}) # Adds to chat history
+            
+            # AI Response
+            with st.spinner():
+                #Get Vectorstore
+                loaders_list, temp_paths = get_loader(pdf_files)
+                vectorstore = get_vectorstore(loaders_list)
+                delete_temp_files(temp_paths)
+                llm = ChatOpenAI(model='gpt-4', verbose=True, temperature=0.9)
+                response = vectorstore.query(question=prompt, llm=llm)
+
+            message(response) # Generated response
+            sst.chat_history.append(
+                {
+                "role": "assistant", 
+                "content": response
+                }
+                ) # Adds to chat history
+    else:
+        st.error("Attatch a PDF to start chatting")
+
+if __name__ == '__main__':
+    main()
