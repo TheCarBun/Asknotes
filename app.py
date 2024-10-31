@@ -25,24 +25,34 @@ def show_chat(messages:list):
         key=str(i)
         )
 
-def get_vectorstore(loader_list:list):
-    embeddings = OpenAIEmbeddings()
-    vectorstore = VectorstoreIndexCreator(vectorstore_cls=FAISS, embedding=embeddings).from_loaders(loader_list)
-    return vectorstore
+def get_vectorstore(loader_list: list):
+    try:
+        embeddings = OpenAIEmbeddings()
+        vectorstore = VectorstoreIndexCreator(vectorstore_cls=FAISS, embedding=embeddings).from_loaders(loader_list)
+        return vectorstore
+    except Exception as e:
+        st.error(f"Error creating vectorstore: {e}")
+        return None
 
-def get_loader(pdf_files:list):
+def get_loader(pdf_files: list):
     pdf_loader_list = []
     temp_paths = []
     for pdf in pdf_files:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as f:
-            f.write(pdf.getvalue())  # Write PDF content to file
-            pdf_loader_list.append(PyPDFLoader(f.name))  # Append loader
-            temp_paths.append(f.name)  # Save path for later cleanup
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as f:
+                f.write(pdf.getvalue())
+                pdf_loader_list.append(PyPDFLoader(f.name))
+                temp_paths.append(f.name)
+        except Exception as e:
+            st.error(f"Error loading PDF {pdf.name}: {e}")
     return pdf_loader_list, temp_paths
 
-def delete_temp_files(temp_paths:list):
+def delete_temp_files(temp_paths: list):
     for path in temp_paths:
-        os.remove(path)
+        try:
+            os.remove(path)
+        except Exception as e:
+            st.warning(f"Failed to delete temp file {path}: {e}")
 
 
 def main():
@@ -82,21 +92,37 @@ def main():
             sst.chat_history.append({"role": "user", "content": prompt}) # Adds to chat history
             
             # AI Response
-            with st.spinner():
-                #Get Vectorstore
-                loaders_list, temp_paths = get_loader(pdf_files)
-                vectorstore = get_vectorstore(loaders_list)
-                delete_temp_files(temp_paths)
-                llm = ChatOpenAI(model='gpt-4', verbose=True, temperature=0.9)
-                response = vectorstore.query(question=prompt, llm=llm)
+            with st.spinner("Processing..."):
+                try:
+                    loaders_list, temp_paths = get_loader(pdf_files)
+                    if not loaders_list:
+                        st.error("No valid PDF files could be processed.")
+                        return
 
-            message(response) # Generated response
-            sst.chat_history.append(
-                {
-                "role": "assistant", 
-                "content": response
-                }
-                ) # Adds to chat history
+                    vectorstore = get_vectorstore(loaders_list)
+                    delete_temp_files(temp_paths)
+
+                    if vectorstore is None:
+                        st.error("Failed to create a vectorstore.")
+                        return
+
+                    llm = ChatOpenAI(model='gpt-4', verbose=True, temperature=0.9)
+                    try:
+                        response = vectorstore.query(question=prompt, llm=llm)
+                    except Exception as query_error:
+                        st.error(f"Error querying the vectorstore: {query_error}")
+                        response = "There was an error processing your query."
+
+                    message(response)
+                    sst.chat_history.append(
+                      {
+                      "role": "assistant", 
+                      "content": response
+                      }
+                      )
+
+                except Exception as e:
+                    st.error(f"An error occurred: {e}")
     else:
         st.error("Attatch a PDF to start chatting")
 
