@@ -192,10 +192,17 @@ def main():
     prompt = st.chat_input("Enter your question:")
     if prompt:
       add_to_chat("user", prompt)  # Adds user message to chat history
+
+      # Modify prompt for teacher-like response
+      teacher_prompt = (
+          "You are an expert teacher with in-depth knowledge. When responding, explain your answer in detail, "
+          "use examples if relevant, and structure your response as you would in a teaching environment. "
+          "Reference relevant sections from the PDF. Here is the question: "
+      ) + prompt
       
       llm = ChatOpenAI(model='gpt-4', verbose=True, temperature=0.9)
       try:
-        response = sst.vectorstore.query(question=prompt, llm=llm)
+        response = sst.vectorstore.query(question=teacher_prompt, llm=llm)
       except Exception as query_error:
         st.error(f"Error querying the vectorstore: {query_error}")
         response = "There was an error processing your query."
