@@ -144,15 +144,15 @@ def main():
     )
 
     if "chat_history" in sst:
-      if st.button("Clear Chat History"):
+      if st.button("Clear Chat History", type='primary', use_container_width=True):
         initialize_chat_history()
     
     if "vectorstore" in sst:
-      if st.button("Delete Vectorstore"):
+      if st.button("Remake Vectorstore", use_container_width=True):
         sst.pop("vectorstore", None)
   # ---- ---- ---- ---- ---- ----
 
-  if pdf_files and st.sidebar.button("Process PDFs"):
+  if pdf_files:
     if "pdf_files" not in sst:
       sst.pdf_files = pdf_files
     
