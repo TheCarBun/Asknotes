@@ -1,0 +1,21 @@
+/* Hide Streamlit Default Header */
+header {
+  visibility: hidden;
+}
+/* Hide Streamlit Footer: Hosted with Streamlit */
+._container_19b1q_1{
+  display: none;
+}
+
+/* Hide nav bar on Sidebar */
+.st-emotion-cache-kgpedg{
+  display: none;
+}
+
+/* Padding correction for chats */
+.st-emotion-cache-1jicfl2{
+  padding: 1rem 3rem 1rem;
+}
+.st-emotion-cache-7tauuy{
+  padding: 1rem 3rem 1rem;
+}

@@ -124,6 +124,24 @@ def delete_temp_files(temp_paths: list):
     except Exception as e:
       st.warning(f"Failed to delete temp file {path}: {e}")
 
+
+def load_css() -> str:
+    """
+    Loads CSS stylesheet and SVG background from local files.
+
+    Returns:
+    - str: The content of the CSS file.
+    """
+    # Load CSS stylesheet
+    try:
+        with open('static/styles.css') as f:
+            custom_css = f.read()
+        return custom_css
+    except FileNotFoundError:
+        st.toast('❗Error loading stylesheet: File not found.')
+    except Exception as e:
+        st.toast('❗Error loading stylesheet.')
+
 def main():
   # Set up the main page layout and title
   st.set_page_config(
@@ -133,6 +151,9 @@ def main():
     initial_sidebar_state='expanded'
   )
   st.title("📝AskNotes.ai")
+
+  # Custom CSS
+  st.markdown(f'<style>{load_css()}</style>', unsafe_allow_html=True)
 
   # ---- Sidebar Content ----
   with st.sidebar:
