@@ -10,6 +10,9 @@ from streamlit_chat import message
 OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']
 
 def initialize_log():
+  """
+  Initializes log message list
+  """
   sst["log"] = [{
     "status" : "info",
     "message" : "Displaying background activity.."
@@ -20,8 +23,7 @@ def display_log(logs:list):
   Display a log message in the sidebar when `show_bts` is active.
 
   Args:
-      message (str): The log message to display.
-      status (str): Type of message; could be "info", "warning", or "error".
+      logs (list): List of log messages
   """
   for log_msg in logs:
     if log_msg.get('status') == "info":
@@ -32,6 +34,12 @@ def display_log(logs:list):
       sst.container.caption(f":red[{log_msg.get('message')}]")
 
 def add_to_log(message:str, status="info"):
+  """Adds message to List of log messages
+
+  Args:
+      message (str): log message
+      status (str, optional): "info", "success" or "error". Status of log message. Defaults to "info".
+  """
   sst.log.append( {
     "status" : status,
     "message" : message
