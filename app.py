@@ -6,6 +6,7 @@ from langchain.indexes import VectorstoreIndexCreator
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from streamlit_chat import message
+import time
 
 OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']
 
@@ -223,6 +224,14 @@ def main():
     prompt = st.chat_input("Enter your question:")
     if prompt:
       add_to_chat("user", prompt)  # Adds user message to chat history
+      
+      # Progress Bar
+      progress_text_list = ["Scanning PDF...", "Gathering info...", "Vectorizing gathered info...", "Preparing response..."]
+      progress_bar = st.progress(value=0, text=progress_text_list[0])
+
+      if sst.show_bts:
+        st.sidebar.caption(":grey[Generating Response..]")
+
 
       # Modify prompt for teacher-like response
       teacher_prompt = (
@@ -234,6 +243,13 @@ def main():
       llm = ChatOpenAI(model='gpt-4', verbose=True, temperature=0.9)
       try:
         response = sst.vectorstore.query(question=teacher_prompt, llm=llm)
+        for percent_complete in range(100): # Animating progress bar
+          time.sleep(0.01)
+          progress_bar.progress(percent_complete + 1, text=progress_text_list[percent_complete//25])
+        time.sleep(0.5)
+        progress_bar.empty()
+        if sst.show_bts:
+          st.sidebar.caption(":grey[Displaying Response..]")
       except Exception as query_error:
         st.error(f"Error querying the vectorstore: {query_error}")
         response = "There was an error processing your query."
