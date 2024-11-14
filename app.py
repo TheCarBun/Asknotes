@@ -7,7 +7,10 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from streamlit_chat import message
 import io
-import json
+from docx import Document  # Main document creation class
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT  # For paragraph alignment options
+from docx.shared import Pt, RGBColor  # For font size and color settings
+
 
 OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']
 
@@ -198,15 +201,46 @@ def load_css() -> str:
 
 def export_chat_history():
   """
-  Exports the chat history as a text file.
+  Exports the chat history as an interactive .docx file with enhanced formatting.
 
+  Returns:
+      io.BytesIO: In-memory .docx file containing the chat history with enhanced formatting.
   """
   if "chat_history" in sst:
-    chat_history_data = sst["chat_history"]
-    # Convert chat history to JSON format and encode to bytes
-    chat_history_json = json.dumps(chat_history_data, indent=2)
-    chat_history_file = io.BytesIO(chat_history_json.encode("utf-8"))
-    return chat_history_file
+    # Create a new Document
+    doc = Document()
+    doc.add_heading("Chat History", level=1).alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    # Customize font and add sections for each chat entry
+    for i, msg in enumerate(sst["chat_history"]):
+        # Format user and AI messages differently
+        role = "User" if msg["role"] == "user" else "AI"
+        role_paragraph = doc.add_paragraph()
+        role_run = role_paragraph.add_run(f"{role} says:")
+        role_run.bold = True
+        role_run.font.size = Pt(12)
+        if role == "User":
+            role_run.font.color.rgb = RGBColor(0, 102, 204)  # Blue for User
+        else:
+            role_run.font.color.rgb = RGBColor(0, 153, 76)   # Green for AI
+            
+        # Add the message content with indentation and spacing
+        message_paragraph = doc.add_paragraph(msg['content'])
+        message_paragraph.paragraph_format.left_indent = Pt(20)
+        message_paragraph.paragraph_format.space_after = Pt(10)
+        message_paragraph.style.font.size = Pt(11)
+            
+        # Separate each chat entry visually
+        if i < len(sst["chat_history"]) - 1:
+            doc.add_paragraph("\u2015" * 50).alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    # Save the document to an in-memory file
+    docx_file = io.BytesIO()
+    doc.save(docx_file)
+    docx_file.seek(0)  # Reset pointer to start of the file
+        
+    return docx_file
+
 
 def main():
   # Set up the main page layout and title
@@ -243,7 +277,7 @@ def main():
       chat_history_file = export_chat_history()
       if chat_history_file:
         st.download_button(
-          label="Download Chat History", data=chat_history_file, file_name="chat_history.json", mime="application/json", use_container_width=True, type='primary')
+          label="Download Chat History as .docx", data=chat_history_file, file_name="chat_history.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True, type='primary')
         
     if "vectorstore" in sst:
       if st.button("Remake Vectorstore", use_container_width=True):
