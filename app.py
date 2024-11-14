@@ -271,15 +271,15 @@ def main():
           "use examples if relevant, and structure your response as you would in a teaching environment. "
           "Reference relevant sections from the PDF. Here is the question: "
       ) + prompt
-      
-      llm = ChatOpenAI(model='gpt-4', verbose=True, temperature=0.9)
-      try:
-        response = sst.vectorstore.query(question=teacher_prompt, llm=llm)
-      except Exception as query_error:
-        st.error(f"Error querying the vectorstore: {query_error}")
-        response = "There was an error processing your query."
+      with st.spinner("Generating response..."):
+        llm = ChatOpenAI(model='gpt-4', verbose=True, temperature=0.9)
+        try:
+          response = sst.vectorstore.query(question=teacher_prompt, llm=llm)
+        except Exception as query_error:
+          st.error(f"Error querying the vectorstore: {query_error}")
+          response = "There was an error processing your query."
 
-      add_to_chat("ai", response)
+        add_to_chat("ai", response)
 
   else:
     st.info("Attach a PDF to start chatting")
