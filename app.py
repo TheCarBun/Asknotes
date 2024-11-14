@@ -119,7 +119,6 @@ def get_vectorstore():
         vectorstore_cls=FAISS, 
         embedding=embeddings
       ).from_loaders(loader_list)
-      st.toast("Vectorstore created successfully!")
       add_to_log("Created Vectorstore Successfully..", "success")
       st.rerun()
   except Exception as e:
@@ -154,7 +153,6 @@ def get_loader(pdf_files: list):
         except Exception as e:
           add_to_log("Error: Unable to load PDF..", "error")
           st.error(f"Error loading PDF {pdf.name}: {e}")
-      st.toast("PDFs loaded successfully!")
       add_to_log("PDFs loaded successfully!", "success")
       return pdf_loader_list, temp_paths
       
@@ -192,9 +190,9 @@ def load_css() -> str:
             custom_css = f.read()
         return custom_css
     except FileNotFoundError:
-        st.toast('❗Error loading stylesheet: File not found.')
+        add_to_log("❗Error loading stylesheet: File not found.", "error")
     except Exception as e:
-        st.toast('❗Error loading stylesheet.')
+        add_to_log("❗Error loading stylesheet.", "error")
 
 def main():
   # Set up the main page layout and title
@@ -253,7 +251,7 @@ def main():
       sst.pdf_files = pdf_files
       get_vectorstore()
     else:
-      st.toast("Reusing existing Vectorstore")
+      add_to_log("Reusing existing Vectorstore", "success")
 
     if "chat_history" not in sst:
       initialize_chat_history()
