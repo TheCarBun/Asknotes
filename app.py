@@ -114,12 +114,11 @@ def get_vectorstore():
         add_to_log("Error while processing PDFs..", "error")
         return
       
-      sst.vectorstore = []
-      # embeddings = OpenAIEmbeddings()
-      # sst.vectorstore = VectorstoreIndexCreator(
-      #   vectorstore_cls=FAISS, 
-      #   embedding=embeddings
-      # ).from_loaders(loader_list)
+      embeddings = OpenAIEmbeddings()
+      sst.vectorstore = VectorstoreIndexCreator(
+        vectorstore_cls=FAISS, 
+        embedding=embeddings
+      ).from_loaders(loader_list)
       st.toast("Vectorstore created successfully!")
       add_to_log("Created Vectorstore Successfully..", "success")
       st.rerun()
