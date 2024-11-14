@@ -27,7 +27,7 @@ def display_log(logs:list):
   """
   for log_msg in logs:
     if log_msg.get('status') == "info":
-      sst.container.caption(f":grey[{log_msg.get('message')}]")
+      sst.container.caption(f"{log_msg.get('message')}")
     elif log_msg.get('status') == "success":
       sst.container.caption(f":green[{log_msg.get('message')}]")
     elif log_msg.get('status') == "error":
@@ -45,7 +45,7 @@ def add_to_log(message:str, status="info"):
     "message" : message
   })
   if sst.show_bts:
-    sst.container.caption(f":grey[{message}]")
+    sst.container.caption(f":grey-background[{message}]")
     
 def initialize_chat_history():
   """
