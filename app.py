@@ -6,6 +6,8 @@ from langchain.indexes import VectorstoreIndexCreator
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from streamlit_chat import message
+import io
+import json
 
 OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']
 
@@ -194,6 +196,18 @@ def load_css() -> str:
     except Exception as e:
         add_to_log("❗Error loading stylesheet.", "error")
 
+def export_chat_history():
+  """
+  Exports the chat history as a text file.
+
+  """
+  if "chat_history" in sst:
+    chat_history_data = sst["chat_history"]
+    # Convert chat history to JSON format and encode to bytes
+    chat_history_json = json.dumps(chat_history_data, indent=2)
+    chat_history_file = io.BytesIO(chat_history_json.encode("utf-8"))
+    return chat_history_file
+
 def main():
   # Set up the main page layout and title
   st.set_page_config(
@@ -222,7 +236,15 @@ def main():
     if "chat_history" in sst:
       if st.button("Clear Chat History", type='primary', use_container_width=True):
         initialize_chat_history()
+        
+    #Add a download button for the chat history if it exists
     
+    if "chat_history" in sst:
+      chat_history_file = export_chat_history()
+      if chat_history_file:
+        st.download_button(
+          label="Download Chat History", data=chat_history_file, file_name="chat_history.json", mime="application/json", use_container_width=True, type='primary')
+        
     if "vectorstore" in sst:
       if st.button("Remake Vectorstore", use_container_width=True):
         sst.pop("vectorstore", None)
@@ -278,7 +300,10 @@ def main():
           response = "There was an error processing your query."
 
         add_to_chat("ai", response)
-
+        
+    
+          
+      
   else:
     st.info("Attach a PDF to start chatting")
 
