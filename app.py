@@ -6,14 +6,24 @@ from langchain.indexes import VectorstoreIndexCreator
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from streamlit_chat import message
+from datetime import datetime
 
 OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']
+
+def get_timestamp():
+  """Generates and returns a timestamp for the current time
+
+  Returns:
+      datetime: Current time in format of Hour:Minute:Second
+  """
+  return datetime.now().strftime("%H:%M:%S")
 
 def initialize_log():
   """
   Initializes log message list
   """
   sst["log"] = [{
+    "time" : get_timestamp(),
     "status" : "info",
     "message" : "Displaying background activity.."
   }]
@@ -27,11 +37,11 @@ def display_log(logs:list):
   """
   for log_msg in logs:
     if log_msg.get('status') == "info":
-      sst.container.caption(f"{log_msg.get('message')}")
+      sst.container.caption(f":orange[[{log_msg.get('time')}]] {log_msg.get('message')}")
     elif log_msg.get('status') == "success":
-      sst.container.caption(f":green[{log_msg.get('message')}]")
+      sst.container.caption(f":orange[[{log_msg.get('time')}]] :green[{log_msg.get('message')}]")
     elif log_msg.get('status') == "error":
-      sst.container.caption(f":red[{log_msg.get('message')}]")
+      sst.container.caption(f":orange[[{log_msg.get('time')}]] :red[{log_msg.get('message')}]")
 
 def add_to_log(message:str, status="info"):
   """Adds message to List of log messages
@@ -41,11 +51,13 @@ def add_to_log(message:str, status="info"):
       status (str, optional): "info", "success" or "error". Status of log message. Defaults to "info".
   """
   if sst.show_bts:
-    sst.log.append( {
+    log_entry = {
+      "time" : get_timestamp(),
       "status" : status,
       "message" : message
-    })
-    sst.container.caption(f":grey-background[{message}]")
+    }
+    sst.log.insert(0, log_entry)
+    sst.container.caption(f":orange[[now]] :grey-background[{message}]")
     
 def initialize_chat_history():
   """
