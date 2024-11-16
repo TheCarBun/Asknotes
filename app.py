@@ -41,10 +41,11 @@ def add_to_log(message:str, status="info"):
       status (str, optional): "info", "success" or "error". Status of log message. Defaults to "info".
   """
   if sst.show_bts:
-    sst.log.append( {
+    log_entry = {
       "status" : status,
       "message" : message
-    })
+    }
+    sst.log.insert(0, log_entry)
     sst.container.caption(f":grey-background[{message}]")
     
 def initialize_chat_history():
