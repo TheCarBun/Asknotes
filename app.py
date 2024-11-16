@@ -218,17 +218,17 @@ def main():
       accept_multiple_files=True,
       label_visibility='hidden'
     )
+    if st.toggle("Advanced mode", help="Toggle advanced controls on/off"):
+      if "chat_history" in sst:
+        if st.button("Clear Chat History", type='primary', use_container_width=True):
+          initialize_chat_history()
+      
+      if "vectorstore" in sst:
+        if st.button("Remake Vectorstore", use_container_width=True):
+          sst.pop("vectorstore", None)
 
-    if "chat_history" in sst:
-      if st.button("Clear Chat History", type='primary', use_container_width=True):
-        initialize_chat_history()
     
-    if "vectorstore" in sst:
-      if st.button("Remake Vectorstore", use_container_width=True):
-        sst.pop("vectorstore", None)
-
-    
-    if st.toggle(label="Display backend activity", help="Enable detailed logging of backend processes for transparency and debugging."):
+    if st.toggle(label="Display backend activity", help="Enable/Disable detailed logging of backend processes for transparency and debugging."):
       sst.show_bts = True
       with st.container():
         st.markdown("### Program Logs:")
