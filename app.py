@@ -1,5 +1,6 @@
 import os, tempfile
 import streamlit as st
+import json
 from streamlit import session_state as sst
 from langchain_community.document_loaders.pdf import PyPDFLoader
 from langchain.indexes import VectorstoreIndexCreator
@@ -7,6 +8,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from streamlit_chat import message
 from datetime import datetime
+from io import BytesIO
 
 OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']
 
@@ -109,6 +111,37 @@ def add_to_chat(role, content):
   )
   add_to_log("Displaying Message..")
 
+def prepare_download_file(format_type):
+  
+    """
+    Prepare the chat history file based on the selected format.
+
+    Args:
+        format_type (str): 'JSON' or 'TXT'.
+
+    Returns:
+        tuple: Tuple containing the file content, file name, and file type.
+        
+    """
+    if format_type == "JSON":
+      
+        add_to_log("Preparing chat history as JSON...")
+        return BytesIO(json.dumps(sst.chat_history, indent=4).encode('utf-8')), "chat_history.json", "application/json"
+    
+    elif format_type == "TXT":
+      
+        add_to_log("Preparing chat history as TXT...")
+        text_output = "\n\n".join(
+            [
+                f"{'User' if msg['role'] == 'user' else 'AI'}:\n{msg['content']}"
+                for msg in sst.chat_history
+            ]
+        )
+        text_output = f"Chat History:\n{'=' * 40}\n\n{text_output}\n\n{'=' * 40}\nEnd of Chat"
+        return BytesIO(text_output.encode('utf-8')), "chat_history.txt", "text/plain"
+    
+    return None, None, None
+  
 def get_vectorstore():
   """
   Creates or retrieves an existing vectorstore from session state.
@@ -238,6 +271,22 @@ def main():
       if "vectorstore" in sst:
         if st.button("Remake Vectorstore", use_container_width=True):
           sst.pop("vectorstore", None)
+      
+      if "chat_history" in sst:
+        st.markdown("### Download Chat History:")
+        format_type = st.selectbox("Choose format for download",options=["JSON", "TXT"],index=0,help="Select the format to download chat history.")
+
+        if format_type:
+          file_data, file_name, mime_type = prepare_download_file(format_type)
+          if file_data:
+            st.download_button(
+                label=f"Download as {format_type}",
+                data=file_data,
+                use_container_width=True,
+                file_name=file_name,
+                mime=mime_type
+            )  
+          
 
     
     if st.toggle(label="Display backend activity", help="Enable/Disable detailed logging of backend processes for transparency and debugging."):
@@ -296,3 +345,4 @@ def main():
 
 if __name__ == '__main__':
   main()
+
