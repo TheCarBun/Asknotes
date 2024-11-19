@@ -331,7 +331,8 @@ def main():
           "Reference relevant sections from the PDF. Here is the question: "
       ) + prompt
       with st.spinner("Generating response..."):
-        llm = ChatOpenAI(model='gpt-4', verbose=True, temperature=0.9)
+        add_to_log("Processing query..")
+        llm = ChatOpenAI(model='gpt-4o', verbose=True, temperature=0.9)
         try:
           response = sst.vectorstore.query(question=teacher_prompt, llm=llm)
         except Exception as query_error:
