@@ -131,9 +131,9 @@ def prepare_download_file(format_type):
     elif format_type == "TXT":
       
         add_to_log("Preparing chat history as TXT...")
-        text_output = "\n\n".join(
+        text_output = "\n\n--------------------------------------------------------------\n\n".join(
             [
-                f"{'User' if msg['role'] == 'user' else 'AI'}:\n{msg['content']}"
+                f"{'User' if msg['role'] == 'user' else 'AI'}: {msg['content']}"
                 for msg in sst.chat_history
             ]
         )
