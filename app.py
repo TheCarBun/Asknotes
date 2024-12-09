@@ -264,6 +264,22 @@ def main():
       label_visibility='hidden'
     )
     if st.toggle("Advanced mode", help="Toggle advanced controls on/off"):
+      llm_model = st.radio(
+        label="Select LLM",
+        options=[
+          'gpt-4o-mini', 
+          'gpt-4o', 
+          'o1-preview', 
+          'o1-mini'
+          ],
+        captions=[
+          'General Use($0.150 / 1M input tokens)', 
+          'Advanced Vision and Context($2.50 / 1M input tokens)', 
+          'Advanced Reasoning($15.00 / 1M input tokens)', 
+          'Advanced Maths and Science($3.00 / 1M input tokens)'
+          ]
+               )
+      
       if "chat_history" in sst:
         if st.button("Clear Chat History", type='primary', use_container_width=True):
           initialize_chat_history()
@@ -332,7 +348,7 @@ def main():
       ) + prompt
       with st.spinner("Generating response..."):
         add_to_log("Processing query..")
-        llm = ChatOpenAI(model='gpt-4o', verbose=True, temperature=0.9)
+        llm = ChatOpenAI(model=llm_model, verbose=True, temperature=0.9)
         try:
           response = sst.vectorstore.query(question=teacher_prompt, llm=llm)
         except Exception as query_error:
