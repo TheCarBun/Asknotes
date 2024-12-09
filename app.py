@@ -264,44 +264,49 @@ def main():
       label_visibility='hidden'
     )
     if st.toggle("Advanced mode", help="Toggle advanced controls on/off"):
-      llm_model = st.radio(
-        label="Select LLM",
-        options=[
-          'gpt-4o-mini', 
-          'gpt-4o', 
-          'o1-preview', 
-          'o1-mini'
-          ],
-        captions=[
-          'General Use($0.150 / 1M input tokens)', 
-          'Advanced Vision and Context($2.50 / 1M input tokens)', 
-          'Advanced Reasoning($15.00 / 1M input tokens)', 
-          'Advanced Maths and Science($3.00 / 1M input tokens)'
-          ]
-               )
-      
-      if "chat_history" in sst:
-        if st.button("Clear Chat History", type='primary', use_container_width=True):
-          initialize_chat_history()
-      
-      if "vectorstore" in sst:
-        if st.button("Remake Vectorstore", use_container_width=True):
-          sst.pop("vectorstore", None)
-      
-      if "chat_history" in sst:
-        st.markdown("### Download Chat History:")
-        format_type = st.selectbox("Choose format for download",options=["JSON", "TXT"],index=0,help="Select the format to download chat history.")
+      with st.container(border=True):
+        st.markdown("### Select LLM:")
+        llm_model = st.radio(
+          label="Select LLM",
+          options=[
+            'gpt-4o-mini', 
+            'gpt-4o', 
+            'o1-preview', 
+            'o1-mini'
+            ],
+          captions=[
+            'General Use($0.150 / 1M input tokens)', 
+            'Advanced Vision and Context($2.50 / 1M input tokens)', 
+            'Advanced Reasoning($15.00 / 1M input tokens)', 
+            'Advanced Maths and Science($3.00 / 1M input tokens)'
+            ],
+            label_visibility='hidden'
+                )
+      with st.container(border=True):
+        if "chat_history" in sst:
+          st.markdown("### Refresh Chat:")
+          if st.button("Clear Chat History", type='primary', use_container_width=True):
+            initialize_chat_history()
+        
+        if "vectorstore" in sst:
+          if st.button("Remake Vectorstore", use_container_width=True):
+            sst.pop("vectorstore", None)
 
-        if format_type:
-          file_data, file_name, mime_type = prepare_download_file(format_type)
-          if file_data:
-            st.download_button(
-                label=f"Download as {format_type}",
-                data=file_data,
-                use_container_width=True,
-                file_name=file_name,
-                mime=mime_type
-            )  
+      with st.container(border=True):
+        if "chat_history" in sst:
+          st.markdown("### Download Chat History:")
+          format_type = st.selectbox("Choose format for download",options=["JSON", "TXT"],index=0,help="Select the format to download chat history.")
+
+          if format_type:
+            file_data, file_name, mime_type = prepare_download_file(format_type)
+            if file_data:
+              st.download_button(
+                  label=f"Download as {format_type}",
+                  data=file_data,
+                  use_container_width=True,
+                  file_name=file_name,
+                  mime=mime_type
+              )  
           
 
     
