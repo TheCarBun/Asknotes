@@ -12,6 +12,11 @@ header {
   padding: 0.5rem 1.5rem;
 }
 
+/* Hide sidebar toggle */
+[data-testid="stSidebarHeader"]{
+  display: none;
+}
+
 /* Hide nav bar on Sidebar */
 [data-testid="stSidebarNav"]{
   display: none;
