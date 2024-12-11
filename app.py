@@ -247,7 +247,30 @@ def main():
     layout="wide", 
     initial_sidebar_state='expanded'
   )
-  st.title("📝AskNotes.ai")
+
+# ---- Navbar ----
+  with st.container():
+    app_col, home_col, about_col = st.columns(3)
+
+    app_col.page_link(
+    page='app.py',
+    label='App',
+    icon=':material/robot_2:'
+    )
+    home_col.page_link(
+    page= "pages/home.py",
+    label= "Home",
+    icon= ':material/home:'
+    )
+    about_col.page_link(
+    page='pages/about.py',
+    label='About',
+    icon=':material/star:',
+    )
+  st.markdown("---")
+
+  # Title
+  st.markdown("### 📝AskNotes.ai")
 
   # Custom CSS
   st.markdown(f'<style>{load_css()}</style>', unsafe_allow_html=True)
