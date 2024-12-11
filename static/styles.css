@@ -7,14 +7,23 @@ header {
   display: none;
 }
 
+/* Decrease padding for sidebar toggle button */
+.st-emotion-cache-1mi2ry5{
+  padding: 0.5rem 1.5rem;
+}
+
 /* Hide nav bar on Sidebar */
-.st-emotion-cache-kgpedg{
+[data-testid="stSidebarNav"]{
   display: none;
+}
+/* Padding correction for sidebar */
+.st-emotion-cache-sih973{
+  padding-top: 0;
 }
 
 /* Padding correction for chats */
 .st-emotion-cache-1jicfl2{
-  padding: 1rem 3rem 1rem;
+  padding: 1.5rem 3rem 1rem;
 }
 .st-emotion-cache-7tauuy{
   padding: 1rem 3rem 1rem;
@@ -23,3 +32,8 @@ header {
 .st-au{
   background-color: rgb(47 159 147 / 20%);
 }
+
+/* Center Nav Items */
+.st-emotion-cache-j7qwjs{
+    align-items: center;
+    }
