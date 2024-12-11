@@ -30,11 +30,7 @@ st.markdown("""
         .stSidebar{
             display:none;
             }
-        
-        .st-emotion-cache-1ibsh2c{
-            padding-top: 0;
-            }
-        
+                
         .st-emotion-cache-13ln4jf{
             width: 70%;
             max-width: 100%;
