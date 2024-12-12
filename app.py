@@ -278,7 +278,9 @@ def main():
   # ---- Sidebar Content ----
   if "show_bts" not in sst:
     sst.show_bts = False
-    
+  
+  llm_model = 'gpt-4o-mini'
+  
   with st.sidebar:
     pdf_files = st.file_uploader(
       label="Upload your PDF", 
