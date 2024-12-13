@@ -9,6 +9,7 @@ from langchain_community.vectorstores import FAISS
 from streamlit_chat import message
 from datetime import datetime
 from io import BytesIO
+from pathlib import Path
 
 OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']
 
@@ -60,6 +61,7 @@ def add_to_log(message:str, status="info"):
     }
     sst.log.insert(0, log_entry)
     sst.container.caption(f":orange[[now]] :grey-background[{message}]")
+  print(f"[{get_timestamp()}] : {message}")
     
 def initialize_chat_history():
   """
@@ -222,22 +224,28 @@ def delete_temp_files(temp_paths: list):
   add_to_log("Temporary Files Deleted.", "success")
 
 
-def load_css() -> str:
-    """
-    Loads CSS stylesheet and SVG background from local files.
+def load_css(path:Path= Path('static/styles.css')) -> str:
+  """
+  Loads a CSS stylesheet from a local file.
 
-    Returns:
-    - str: The content of the CSS file.
-    """
-    # Load CSS stylesheet
-    try:
-        with open('static/styles.css') as f:
-            custom_css = f.read()
-        return custom_css
-    except FileNotFoundError:
-        add_to_log("❗Error loading stylesheet: File not found.", "error")
-    except Exception as e:
-        add_to_log("❗Error loading stylesheet.", "error")
+  Args:
+      path (Path): Path to the CSS file (default: 'static/styles.css').
+
+  Returns:
+      str: The content of the CSS file if successfully loaded, otherwise an empty string.
+  """
+  # Load CSS stylesheet
+  try:
+    if not path.is_file():
+      add_to_log(f"❗Error loading stylesheet: {path} does not exist.", "error")
+      return ""
+    with open(path) as f:
+        custom_css = f.read()
+    return custom_css
+  except FileNotFoundError:
+    add_to_log("❗Error loading stylesheet: File not found.", "error")
+  except Exception as e:
+    add_to_log("❗Error loading stylesheet.", "error")
 
 def main():
   # Set up the main page layout and title
@@ -288,7 +296,7 @@ def main():
       accept_multiple_files=True,
       label_visibility='hidden'
     )
-    if st.toggle("Advanced mode", help="Toggle advanced controls on/off"):
+    if st.toggle("Advanced controls", help="Toggle advanced controls on/off"):
       with st.container(border=True):
         st.markdown("### Select LLM:")
         llm_model = st.radio(
