@@ -1,40 +1,22 @@
 import streamlit as st
-from app import add_to_log
+from app import load_css
+from pathlib import Path
 
+# Base CSS
+st.markdown(f'<style>{load_css()}</style>', unsafe_allow_html=True)
 
-def load_css() -> str:
-    """
-    Loads CSS stylesheet and SVG background from local files.
+current_file = Path(__file__)
+css_file = current_file.parent.parent / 'static' / 'home.css'
 
-    Returns:
-    - str: The content of the CSS file.
-    """
-    # Load CSS stylesheet
-    try:
-        with open('static/styles.css') as f:
-            custom_css = f.read()
-        return custom_css
-    except FileNotFoundError:
-        add_to_log("❗Error loading stylesheet: File not found.", "error")
-    except Exception as e:
-        add_to_log("❗Error loading stylesheet.", "error")
-
-
-# Hide Sidebar
-st.markdown("""
+# CSS for Home Page
+if css_file.exists():
+    st.markdown(f"""
     <style>
-        .stSidebar{
-            display:none;
-            }    
-    
-    .st-emotion-cache-13ln4jf{
-        width: 70%;
-        max-width: 100%;
-        padding: 0;
-        }  
+          {load_css(css_file)}
     </style>
 """, unsafe_allow_html=True)
-
+else:
+    print("home.css not found")
 
 # ---- Navbar ----
 with st.container():
@@ -56,8 +38,5 @@ with st.container():
     icon=':material/star:',
     )
 st.markdown("---")
-
-# Base CSS styling
-st.markdown(f'<style>{load_css()}</style>', unsafe_allow_html=True)
 
 st.caption("Work In Progress..")
