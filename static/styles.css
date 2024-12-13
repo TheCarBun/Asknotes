@@ -16,6 +16,9 @@ header {
 [data-testid="stSidebarHeader"]{
   display: none;
 }
+[data-testid="stSidebarCollapsedControl"]{
+  display: none;
+}
 
 /* Hide nav bar on Sidebar */
 [data-testid="stSidebarNav"]{
@@ -27,6 +30,9 @@ header {
 }
 
 /* Padding correction for chats */
+.st-emotion-cache-1e349hp{
+  padding: 1.5rem 1rem 10rem;
+}
 .st-emotion-cache-1jicfl2{
   padding: 1.5rem 3rem 1rem;
 }
@@ -42,7 +48,12 @@ header {
 .st-emotion-cache-j7qwjs{
     align-items: center;
     }
-/* Padding correction for Nav */
+/* Padding correction for Nav on App */
 .st-emotion-cache-1ibsh2c{
-  padding-top: 1.5rem;
+  padding: 1.5rem 1rem 10rem;
   }
+
+/* Phone Nav Style */
+.st-emotion-cache-1h3k0y3 {
+  min-width: auto;
+}
