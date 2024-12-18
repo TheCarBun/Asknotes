@@ -4,6 +4,21 @@
 
 .st-emotion-cache-13ln4jf{
     width: 70%;
-    max-width: 100%;
+    max-width: 70%;
     padding: 0;
+}
+
+
+[data-testid="stBaseLinkButton-primary"]{
+    font-weight: 600;
+    padding: 1rem;
+    border-radius: 1rem;
+    background-color: #fff;
+    transition: all 0.5s;
+    color: #000;
+}
+
+[data-testid="stBaseLinkButton-primary"]:hover{
+    background-color: #222;
+    box-shadow: 0 0 1rem #2f9f93;
 }
