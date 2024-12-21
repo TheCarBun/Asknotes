@@ -1,10 +1,21 @@
 # AskNotes.ai
 
-AskNotes is an interactive learning application designed for students to upload their study materials (in PDF format) and get AI-powered assistance in understanding the content. Built using Streamlit and LangChain, AskNotes provides a question-and-answer interface to query the content within PDF files, offering a personalized learning experience.
-### Deployed at : https://asknotes.streamlit.app/
+### ✨Try for free --> : https://asknotes.streamlit.app/
+
+
+## Inspiration for this project:
+During my university days, one of the biggest challenges I faced was studying from notes provided in the form of PDFs. Whether it was preparing for term exams or solving previous year's question papers, the process was time-consuming and often frustrating. Scrolling through countless pages just to find relevant answers felt like looking for a needle in a haystack. 🕵️‍♂️ <br>
+That’s why I built AskNotes—an AI-powered tool designed to make studying faster, smarter, and more efficient! 🚀<br>
+With AskNotes, you can:<br>
+ ✅ Upload your notes in PDF format.<br>
+ ✅ Ask specific questions about the content.<br>
+ ✅ Get instant, accurate answers in just a few seconds.<br>
+No more wasting hours flipping through pages. Let AskNotes do the heavy lifting so you can focus on what matters most—understanding and learning.
+
 ---
 
 ## Table of Contents
+- [About](#about)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
@@ -15,6 +26,8 @@ AskNotes is an interactive learning application designed for students to upload 
 - [Contributing](#contributing)
 
 ---
+## About
+AskNotes is an interactive learning application designed for students to upload their study materials (in PDF format) and get AI-powered assistance in understanding the content. Built using Streamlit and LangChain, AskNotes provides a question-and-answer interface to query the content within PDF files, offering a personalized learning experience.
 
 ## Features
 - **Upload Study Materials**: Students can upload one or multiple PDFs containing study materials.
