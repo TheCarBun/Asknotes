@@ -1,6 +1,6 @@
 # AskNotes.ai
 
-### ✨Try for free --> : https://asknotes.streamlit.app/
+### ✨Try for free --> : [https://asknotes.streamlit.app/](https://asknotes.streamlit.app/home)
 
 
 ## Inspiration for this project:
