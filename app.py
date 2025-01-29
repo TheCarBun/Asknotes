@@ -53,7 +53,10 @@ def add_to_log(message:str, status="info"):
       message (str): log message
       status (str, optional): "info", "success" or "error". Status of log message. Defaults to "info".
   """
-  if sst.show_bts:
+  # Check if show_bts exists in session state, default to False if not
+  show_bts = getattr(sst, 'show_bts', False)
+  
+  if show_bts:
     log_entry = {
       "time" : get_timestamp(),
       "status" : status,
@@ -158,8 +161,9 @@ def get_vectorstore():
   try:
     with st.spinner("Creating Vectorstore..."):
       if not loader_list:
-        st.error("No valid PDF files could be processed. Please ensure your PDFs contain readable text and try uploading again.")
-        add_to_log("Error: No valid PDFs to process", "error")
+        # Clear PDF files from session state to allow fresh start
+        sst.pdf_files = None
+        st.rerun()  # Force refresh to clear the UI
         return
       
       embeddings = OpenAIEmbeddings()
@@ -171,13 +175,17 @@ def get_vectorstore():
         add_to_log("Created Vectorstore Successfully..", "success")
         st.rerun()
       except Exception as e:
-        st.error(f"Error creating vectorstore: {str(e)}. This may be due to issues with text extraction. Try another PDF with clear text content.")
+        st.toast(f"Error creating vectorstore. Try another PDF.", icon="⚠️")
         add_to_log(f"Error: Unable to create vectorstore - {str(e)}", "error")
-        st.stop()
+        # Clear PDF files from session state
+        sst.pdf_files = None
+        st.rerun()  # Force refresh to clear the UI
   except Exception as e:
-    st.error(f"Unexpected error: {str(e)}. Please try again with different PDFs.")
+    st.toast("Unexpected error. Please try again with a different PDF.", icon="⚠️")
     add_to_log(f"Error: {str(e)}", "error")
-    st.stop()
+    # Clear PDF files from session state
+    sst.pdf_files = None
+    st.rerun()  # Force refresh to clear the UI
   finally:
     delete_temp_files(temp_paths)
 
@@ -198,10 +206,13 @@ def get_loader(pdf_files: list):
     with st.spinner("Loading PDFs..."):
       pdf_loader_list = []
       temp_paths = []
+      has_unreadable_pdfs = False
+      
       for pdf in pdf_files:
         try:
           with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as f:
             f.write(pdf.getvalue())
+            temp_paths.append(f.name)
             # Create loader with enhanced error handling
             loader = PyPDFLoader(
               f.name,
@@ -213,30 +224,34 @@ def get_loader(pdf_files: list):
               # Only add loader if it successfully extracted text
               if any(len(page.page_content.strip()) > 0 for page in pages):
                 pdf_loader_list.append(loader)
-                temp_paths.append(f.name)
                 add_to_log(f"Successfully processed {pdf.name}", "success")
               else:
+                has_unreadable_pdfs = True
                 add_to_log(f"No text content found in {pdf.name}", "error")
-                st.warning(f"No readable text found in {pdf.name}. The file may be scanned or contain only images.")
             except Exception as e:
+              # Loading error for individual page
+              has_unreadable_pdfs = True
               add_to_log(f"Error loading pages from {pdf.name}", "error")
-              st.warning(f"Could not process {pdf.name}: {str(e)}")
         except Exception as e:
+          # Critical error in PDF processing
           add_to_log(f"Error processing {pdf.name}", "error")
-          st.error(f"Error loading PDF {pdf.name}: {str(e)}")
+          st.toast("Error loading PDF. Please try a different file.", icon="⚠️")
+          return None, temp_paths
       
       if pdf_loader_list:
         add_to_log("PDFs loaded successfully!", "success")
+        if has_unreadable_pdfs:
+          st.toast("Some PDFs were skipped. Only PDFs with readable text were included.", icon="ℹ️")
         return pdf_loader_list, temp_paths
       else:
         add_to_log("No valid PDFs could be processed", "error")
-        st.error("No valid PDFs could be processed. Please ensure your PDFs contain readable text.")
+        st.toast("Please upload PDFs with readable text content.", icon="⚠️")
         return None, temp_paths
       
   except Exception as e:
-    st.error("Error loading PDFs. Try uploading another PDF.")
     add_to_log(f"Error: {str(e)}", "error")
-    return None, []
+    st.toast("Error loading PDFs. Please try again with different files.", icon="⚠️")
+    return None, temp_paths
 
 def delete_temp_files(temp_paths: list):
   """
@@ -287,24 +302,24 @@ def main():
     initial_sidebar_state='expanded'
   )
 
-# ---- Navbar ----
+  # ---- Navbar ----
   with st.container():
     app_col, home_col, about_col = st.columns(3)
 
     app_col.page_link(
-    page='app.py',
-    label='App',
-    icon=':material/robot_2:'
+      page='app.py',
+      label='App',
+      icon=':material/robot_2:'
     )
     home_col.page_link(
-    page= "pages/home.py",
-    label= "Home",
-    icon= ':material/home:'
+      page= "pages/home.py",
+      label= "Home",
+      icon= ':material/home:'
     )
     about_col.page_link(
-    page='pages/about.py',
-    label='About',
-    icon=':material/star:',
+      page='pages/about.py',
+      label='About',
+      icon=':material/star:',
     )
   st.markdown("---")
 
@@ -337,15 +352,15 @@ def main():
             'gpt-4o', 
             'o1-preview', 
             'o1-mini'
-            ],
+          ],
           captions=[
             'General Use($0.150 / 1M input tokens)', 
             'Advanced Vision and Context($2.50 / 1M input tokens)', 
             'Advanced Reasoning($15.00 / 1M input tokens)', 
             'Advanced Maths and Science($3.00 / 1M input tokens)'
-            ],
-            label_visibility='hidden'
-                )
+          ],
+          label_visibility='hidden'
+        )
       with st.container(border=True):
         if "chat_history" in sst:
           st.markdown("### Refresh Chat:")
@@ -365,14 +380,12 @@ def main():
             file_data, file_name, mime_type = prepare_download_file(format_type)
             if file_data:
               st.download_button(
-                  label=f"Download as {format_type}",
-                  data=file_data,
-                  use_container_width=True,
-                  file_name=file_name,
-                  mime=mime_type
+                label=f"Download as {format_type}",
+                data=file_data,
+                use_container_width=True,
+                file_name=file_name,
+                mime=mime_type
               )  
-          
-
     
     if st.toggle(label="Display backend activity", help="Enable/Disable detailed logging of backend processes for transparency and debugging."):
       sst.show_bts = True
@@ -389,6 +402,7 @@ def main():
     
     display_log(sst.log)
 
+  # Handle PDF processing and chat interface
   if pdf_files:
     if "pdf_files" not in sst:
       sst.pdf_files = pdf_files
@@ -399,34 +413,40 @@ def main():
     else:
       add_to_log("Reusing existing Vectorstore", "success")
 
-    if "chat_history" not in sst:
-      initialize_chat_history()
+    # Only proceed with chat if we have a valid vectorstore
+    if "vectorstore" in sst:
+      if "chat_history" not in sst:
+        initialize_chat_history()
+      
+      show_chat(sst.chat_history)
+      
+      # Capture User Prompt and Display AI Response
+      prompt = st.chat_input("Enter your question:", disabled=False)
+      if prompt:
+        add_to_chat("user", prompt)
 
-    show_chat(sst.chat_history)
-    
-    # Capture User Prompt and Display AI Response
-    prompt = st.chat_input("Enter your question:")
-    if prompt:
-      add_to_chat("user", prompt)  # Adds user message to chat history
+        with st.spinner("Generating response..."):
+          add_to_log("Processing query..")
+          llm = ChatOpenAI(model=llm_model, verbose=True, temperature=0.9)
+          try:
+            response = sst.vectorstore.query(question=prompt, llm=llm)
+          except Exception as query_error:
+            st.toast("Error processing query. Please try again.", icon="⚠️")
+            response = "I apologize, but I encountered an error processing your query. Please try again."
 
-      # Modify prompt for teacher-like response
-      teacher_prompt = (
-          "You are an expert teacher with in-depth knowledge. When responding, explain your answer in detail, "
-          "use examples if relevant, and structure your response as you would in a teaching environment. "
-          "Reference relevant sections from the PDF. Here is the question: "
-      ) + prompt
-      with st.spinner("Generating response..."):
-        add_to_log("Processing query..")
-        llm = ChatOpenAI(model=llm_model, verbose=True, temperature=0.9)
-        try:
-          response = sst.vectorstore.query(question=teacher_prompt, llm=llm)
-        except Exception as query_error:
-          st.error(f"Error querying the vectorstore: {query_error}")
-          response = "There was an error processing your query."
-
-        add_to_chat("ai", response)
-
+          add_to_chat("ai", response)
+    else:
+      # Show error state and disable chat input
+      st.chat_input("Enter your question:", disabled=True)
+      st.toast("Please remove the current PDF and try uploading a different one.", icon="⚠️")
   else:
+    # Clear all states when no PDF is present
+    if "vectorstore" in sst:
+      del sst.vectorstore
+    if "pdf_files" in sst:
+      del sst.pdf_files
+    if "chat_history" in sst:
+      del sst.chat_history
     st.info("Attach a PDF to start chatting")
 
 if __name__ == '__main__':
