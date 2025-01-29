@@ -147,6 +147,7 @@ def prepare_download_file(format_type):
 def get_vectorstore():
   """
   Creates or retrieves an existing vectorstore from session state.
+  Includes enhanced error handling for PDFs with graphics or no text content.
 
   Returns:
       Vectorstore object stored in session state.
@@ -157,20 +158,25 @@ def get_vectorstore():
   try:
     with st.spinner("Creating Vectorstore..."):
       if not loader_list:
-        st.error("No valid PDF files could be processed. Try uploading another PDF.")
-        add_to_log("Error while processing PDFs..", "error")
+        st.error("No valid PDF files could be processed. Please ensure your PDFs contain readable text and try uploading again.")
+        add_to_log("Error: No valid PDFs to process", "error")
         return
       
       embeddings = OpenAIEmbeddings()
-      sst.vectorstore = VectorstoreIndexCreator(
-        vectorstore_cls=FAISS, 
-        embedding=embeddings
-      ).from_loaders(loader_list)
-      add_to_log("Created Vectorstore Successfully..", "success")
-      st.rerun()
+      try:
+        sst.vectorstore = VectorstoreIndexCreator(
+          vectorstore_cls=FAISS, 
+          embedding=embeddings
+        ).from_loaders(loader_list)
+        add_to_log("Created Vectorstore Successfully..", "success")
+        st.rerun()
+      except Exception as e:
+        st.error(f"Error creating vectorstore: {str(e)}. This may be due to issues with text extraction. Try another PDF with clear text content.")
+        add_to_log(f"Error: Unable to create vectorstore - {str(e)}", "error")
+        st.stop()
   except Exception as e:
-    st.error(f"Error creating vectorstore: `{e}`. Try another PDF.")
-    add_to_log("Error: Unable to create vectostore..", "error")
+    st.error(f"Unexpected error: {str(e)}. Please try again with different PDFs.")
+    add_to_log(f"Error: {str(e)}", "error")
     st.stop()
   finally:
     delete_temp_files(temp_paths)
@@ -178,6 +184,7 @@ def get_vectorstore():
 def get_loader(pdf_files: list):
   """
   Creates PDF loaders from uploaded PDFs, saving each file temporarily.
+  Includes enhanced error handling for PDFs with graphics.
 
   Args:
       pdf_files (list): List of uploaded PDFs.
@@ -195,17 +202,41 @@ def get_loader(pdf_files: list):
         try:
           with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as f:
             f.write(pdf.getvalue())
-            pdf_loader_list.append(PyPDFLoader(f.name))
-            temp_paths.append(f.name)
+            # Create loader with enhanced error handling
+            loader = PyPDFLoader(
+              f.name,
+              extract_images=False  # Skip image extraction to avoid errors
+            )
+            # Test load to catch any immediate issues
+            try:
+              pages = loader.load()
+              # Only add loader if it successfully extracted text
+              if any(len(page.page_content.strip()) > 0 for page in pages):
+                pdf_loader_list.append(loader)
+                temp_paths.append(f.name)
+                add_to_log(f"Successfully processed {pdf.name}", "success")
+              else:
+                add_to_log(f"No text content found in {pdf.name}", "error")
+                st.warning(f"No readable text found in {pdf.name}. The file may be scanned or contain only images.")
+            except Exception as e:
+              add_to_log(f"Error loading pages from {pdf.name}", "error")
+              st.warning(f"Could not process {pdf.name}: {str(e)}")
         except Exception as e:
-          add_to_log("Error: Unable to load PDF..", "error")
-          st.error(f"Error loading PDF {pdf.name}: {e}")
-      add_to_log("PDFs loaded successfully!", "success")
-      return pdf_loader_list, temp_paths
+          add_to_log(f"Error processing {pdf.name}", "error")
+          st.error(f"Error loading PDF {pdf.name}: {str(e)}")
+      
+      if pdf_loader_list:
+        add_to_log("PDFs loaded successfully!", "success")
+        return pdf_loader_list, temp_paths
+      else:
+        add_to_log("No valid PDFs could be processed", "error")
+        st.error("No valid PDFs could be processed. Please ensure your PDFs contain readable text.")
+        return None, temp_paths
       
   except Exception as e:
     st.error("Error loading PDFs. Try uploading another PDF.")
-    return
+    add_to_log(f"Error: {str(e)}", "error")
+    return None, []
 
 def delete_temp_files(temp_paths: list):
   """
