@@ -8,6 +8,15 @@ from app import get_loader, get_vectorstore
 from io import BytesIO
 import app
 
+class MockUploadedFile:
+    def __init__(self, name, content, type):
+        self.name = name
+        self.content = content
+        self.type = type
+
+    def read(self):
+        return self.content
+
 class TestPDFProcessing(unittest.TestCase):
     def setUp(self):
         """Set up test environment before each test"""
@@ -220,24 +229,22 @@ class TestPDFHandling(unittest.TestCase):
         self.assertEqual(len(loader_list), 2)  # Both PDFs should be processed
         mock_toast.assert_not_called()
 
-    @patch('streamlit.toast')
-    @patch('app.PyPDFLoader')
-    def test_pdf_loading_error(self, mock_loader, mock_toast):
-        # Mock PDF loading error
-        class MockLoader:
-            def __init__(self, file_path, extract_images=False):
-                raise Exception("PDF loading error")
-
-        mock_loader.side_effect = MockLoader
-        
-        # Test processing a PDF that causes an error
-        loader_list, temp_paths = app.get_loader([self.text_pdf])
-        
-        self.assertIsNone(loader_list)
-        mock_toast.assert_called_once_with(
-            "Error loading PDF. Please try a different file.",
-            icon="⚠️"
-        )
+    def test_pdf_loading_error(self):
+        """Test handling of PDF loading errors."""
+        mock_files = [
+            MockUploadedFile("sample_text.pdf", b"mock content", "application/pdf")
+        ]
+        with patch("app.st.file_uploader", return_value=mock_files), \
+             patch("app.st.toast") as mock_toast, \
+             patch("app.st.info"), \
+             patch("app.st.session_state", self.mock_session_state), \
+             patch("app.PyPDFLoader", side_effect=Exception("Mock error")):
+            
+            result = app.get_vectorstore()
+            self.assertIsNone(result)
+            mock_toast.assert_called_once_with(
+                "Please upload PDFs with readable text content.", icon="⚠️"
+            )
 
 if __name__ == '__main__':
     unittest.main() 
