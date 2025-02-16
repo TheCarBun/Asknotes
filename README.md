@@ -1,6 +1,23 @@
-# AskNotes.ai
+# 📝 AskNotes.ai - AI Teacher
+![GitHub commit activity](https://img.shields.io/github/commit-activity/t/TheCarBun/Asknotes?style=for-the-badge) 
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-raw/TheCarBun/Asknotes?style=for-the-badge) 
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr-raw/TheCarBun/Asknotes?style=for-the-badge) 
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-closed-raw/TheCarBun/Asknotes?style=for-the-badge) 
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr-closed-raw/TheCarBun/Asknotes?style=for-the-badge)
+![GitHub last commit](https://img.shields.io/github/last-commit/TheCarBun/Asknotes?style=for-the-badge)
+![GitHub forks](https://img.shields.io/github/forks/TheCarBun/Asknotes?style=for-the-badge)
+![GitHub Repo stars](https://img.shields.io/github/stars/TheCarBun/Asknotes?style=for-the-badge)
+
+## ✨ About
+Asknotes is crafted to revolutionize the way students engage with their study materials. By seamlessly reading PDF notes, Asknotes transforms passive information into active learning, making study sessions more effective and enjoyable.
+
+Asknotes is an innovative AI application built with Langchain that leverages the power of RAG(Retrieval Augmented Generation).
+
+With Asknotes, students can effortlessly extract key insights from their PDF notes and receive personalized study guidance, ensuring they grasp concepts with confidence.
 
 ### ✨Try for free --> : [https://asknotes.streamlit.app/](https://asknotes.streamlit.app/home)
+
+![image](https://github.com/user-attachments/assets/a87d9508-9e56-4a50-aa16-e981f717cf05)
 
 
 ## Inspiration for this project:
