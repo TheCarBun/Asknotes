@@ -2,56 +2,57 @@
 header {
   visibility: hidden;
 }
+
 /* Hide Streamlit Footer: Hosted with Streamlit */
-._container_19b1q_1{
+._container_19b1q_1 {
   display: none;
 }
 
 /* Decrease padding for sidebar toggle button */
-.st-emotion-cache-1mi2ry5{
+.st-emotion-cache-1mi2ry5 {
   padding: 0.5rem 1.5rem;
 }
 
 /* Hide sidebar toggle */
-[data-testid="stSidebarHeader"]{
-  display: none;
-}
-[data-testid="stSidebarCollapsedControl"]{
+[data-testid="stSidebarHeader"] {
   display: none;
 }
 
-/* Hide nav bar on Sidebar */
-[data-testid="stSidebarNav"]{
+[data-testid="stSidebarCollapsedControl"] {
   display: none;
 }
+
 /* Padding correction for sidebar */
-.st-emotion-cache-sih973{
+.st-emotion-cache-sih973 {
   padding-top: 0;
 }
 
 /* Padding correction for chats */
-.st-emotion-cache-1e349hp{
+.st-emotion-cache-1e349hp {
   padding: 1.5rem 1rem 10rem;
 }
-.st-emotion-cache-1jicfl2{
+
+.st-emotion-cache-1jicfl2 {
   padding: 1.5rem 3rem 1rem;
 }
-.st-emotion-cache-7tauuy{
+
+.st-emotion-cache-7tauuy {
   padding: 1rem 3rem 1rem;
 }
 
-.st-au{
+.st-au {
   background-color: rgb(47 159 147 / 20%);
 }
 
 /* Center Nav Items */
-.st-emotion-cache-j7qwjs{
-    align-items: center;
-    }
+.st-emotion-cache-j7qwjs {
+  align-items: center;
+}
+
 /* Padding correction for Nav on App */
-.st-emotion-cache-1ibsh2c{
+.st-emotion-cache-1ibsh2c {
   padding: 1.5rem 1rem 10rem;
-  }
+}
 
 /* Phone Nav Style */
 .st-emotion-cache-1h3k0y3 {
