@@ -4,25 +4,14 @@ from langchain_openai import ChatOpenAI
 from utils.chat import initialize_chat_history, show_chat, add_to_chat
 from utils.logs import initialize_log, display_log, add_to_log
 from utils.vectorstore import get_vectorstore
-from utils.ui import navbar
+from utils.ui import base_ui, promo
 from utils.utils import load_css, prepare_download_file
 
 OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']
 
 
 def main():
-    # Set up the main page layout and title
-    st.set_page_config(
-        page_title="AskNotes.ai", 
-        page_icon='📝', 
-        layout="wide", 
-        initial_sidebar_state='expanded'
-    )
-
-    # ---- Navbar ----
-    with st.container():
-        navbar()
-    st.markdown("---")
+    base_ui()
 
     # Title
     st.markdown("### 📝AskNotes.ai")
@@ -95,6 +84,7 @@ def main():
                 sst.container = st.container(height= 200)
         else:
             sst.show_bts = False
+        promo()
 
     if sst.show_bts:
         if "log" not in sst:
