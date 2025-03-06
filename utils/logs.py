@@ -1,14 +1,20 @@
 from streamlit import session_state as sst
 from datetime import datetime
 
-timestamp = datetime.now().strftime("%H:%M:%S")
+def get_timestamp():
+  """Generates and returns a timestamp for the current time
+
+  Returns:
+      datetime: Current time in format of Hour:Minute:Second
+  """
+  return datetime.now().strftime("%H:%M:%S")
 
 def initialize_log():
   """
   Initializes log message list
   """
   sst["log"] = [{
-    "time" : timestamp,
+    "time" : get_timestamp(),
     "status" : "info",
     "message" : "Displaying background activity.."
   }]
@@ -40,10 +46,10 @@ def add_to_log(message:str, status="info"):
   
   if show_bts:
     log_entry = {
-      "time" : timestamp,
+      "time" : get_timestamp(),
       "status" : status,
       "message" : message
     }
     sst.log.insert(0, log_entry)
     sst.container.caption(f":orange[[now]] :grey-background[{message}]")
-  print(f"[{timestamp}] : {message}")
+  print(f"[{get_timestamp()}] : {message}")
