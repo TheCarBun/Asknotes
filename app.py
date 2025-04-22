@@ -1,13 +1,13 @@
 import streamlit as st
 from streamlit import session_state as sst
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from utils.chat import initialize_chat_history, show_chat, add_to_chat
 from utils.logs import initialize_log, display_log, add_to_log
 from utils.vectorstore import get_vectorstore
 from utils.ui import base_ui, promo
 from utils.utils import load_css, prepare_download_file
 
-OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']
+GEMINI_API_KEY = st.secrets['GEMINI_API_KEY']
 
 
 def main():
@@ -23,7 +23,7 @@ def main():
     if "show_bts" not in sst:
         sst.show_bts = False
     
-    llm_model = 'gpt-4o-mini'
+    llm_model = 'gemini-2.0-flash-lite'
     
     with st.sidebar:
         pdf_files = st.file_uploader(
@@ -38,16 +38,12 @@ def main():
                 llm_model = st.radio(
                     label="Select LLM",
                     options=[
-                        'gpt-4o-mini', 
-                        'gpt-4o', 
-                        'o1-preview', 
-                        'o1-mini'
+                        'gemini-2.0-flash', 
+                        'gemini-1.5-flash',
                     ],
                     captions=[
-                        'General Use($0.150 / 1M input tokens)', 
-                        'Advanced Vision and Context($2.50 / 1M input tokens)', 
-                        'Advanced Reasoning($15.00 / 1M input tokens)', 
-                        'Advanced Maths and Science($3.00 / 1M input tokens)'
+                        'Code execution, long context (15rpm, 1500rpd, 1mil)', 
+                        'Fast and versatile (15rpm, 1500rpd, 1mil)'
                     ],
                     label_visibility='hidden'
                 )
@@ -114,7 +110,7 @@ def main():
 
                 with st.spinner("Generating response..."):
                     add_to_log("Processing query..")
-                    llm = ChatOpenAI(model=llm_model, verbose=True, temperature=0.9)
+                    llm = ChatGoogleGenerativeAI(model=llm_model, temperature=0.9, google_api_key=GEMINI_API_KEY)
                     try:
                         response = sst.vectorstore.query(question=prompt, llm=llm)
                     except Exception as query_error:

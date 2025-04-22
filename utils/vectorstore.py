@@ -1,12 +1,14 @@
 import streamlit as st
 from streamlit import session_state as sst
 from langchain.indexes import VectorstoreIndexCreator
-from langchain_openai import OpenAIEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders.pdf import PyPDFLoader
 from utils.logs import add_to_log
 from utils.utils import delete_temp_files
 import tempfile
+
+GEMINI_API_KEY = st.secrets['GEMINI_API_KEY']
 
 def get_vectorstore():
     """
@@ -27,7 +29,7 @@ def get_vectorstore():
                     del sst.vectorstore
                 return None
             
-            embeddings = OpenAIEmbeddings()
+            embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004", google_api_key=GEMINI_API_KEY)
             try:
                 sst.vectorstore = VectorstoreIndexCreator(
                     vectorstore_cls=FAISS, 
