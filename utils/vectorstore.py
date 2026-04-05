@@ -29,7 +29,7 @@ def get_vectorstore():
                     del sst.vectorstore
                 return None
             
-            embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004", google_api_key=GEMINI_API_KEY)
+            embeddings = GoogleGenerativeAIEmbeddings(model="gemini-embedding-001", transport="rest", google_api_key=GEMINI_API_KEY)
             try:
                 sst.vectorstore = VectorstoreIndexCreator(
                     vectorstore_cls=FAISS, 

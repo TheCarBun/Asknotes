@@ -23,7 +23,7 @@ def main():
     if "show_bts" not in sst:
         sst.show_bts = False
     
-    llm_model = 'gemini-2.0-flash-lite'
+    llm_model = 'gemini-2.5-flash-lite'
     
     with st.sidebar:
         pdf_files = st.file_uploader(
@@ -38,12 +38,16 @@ def main():
                 llm_model = st.radio(
                     label="Select LLM",
                     options=[
-                        'gemini-2.0-flash', 
-                        'gemini-1.5-flash',
+                        'gemini-2.0-flash-lite', 
+                        'gemini-2.0-flash',
+                        'gemini-2.5-flash-lite',
+                        'gemini2.5-flash'
                     ],
                     captions=[
-                        'Code execution, long context (15rpm, 1500rpd, 1mil)', 
-                        'Fast and versatile (15rpm, 1500rpd, 1mil)'
+                        'Fast and versatile (15rpm, 1500rpd, 1mil)', 
+                        'Code execution, long context (15rpm, 1500rpd, 1mil)',
+                        'Fast and versatile (15rpm, 1500rpd, 1mil)',
+                        'Code execution, long context (15rpm, 1500rpd, 1mil)'
                     ],
                     label_visibility='hidden'
                 )
